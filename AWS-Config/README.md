@@ -9,8 +9,8 @@
   
    **NOTE:** Rules can be managed or custom. But for custom rules, there may be some extra properties to be configured.
    
- #### Deploy Managed Rules
-   - Individual Rules can be easily deployed in form of CloudFormation stacks using the following official s3 template URL.
+ #### Deploy Managed Config Rules
+   - Individual Rules can be easily deployed in form of CloudFormation stacks using the following official s3 template URL for managed rules.
      
    		>s3.amazonaws.com/aws-configservice-us-east-1/cloudformation-templates-for-managed-rules/**[ THE_RULE_IDENTIFIER ]**.template
      
