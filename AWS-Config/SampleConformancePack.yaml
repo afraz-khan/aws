@@ -1,0 +1,8 @@
+Resources:
+  ConformancePack001
+  Type: AWS::Config::ConformancePack
+  Properties:
+    ConformancePackName: ConformancePack001
+    DeliveryS3Bucket: config-conformancepack-bucket # optional, will create new anyway
+    DeliveryS3KeyPrefix: AWSLogs/992959714272/Config # optional, will create folder itself
+    TemplateS3Uri: s3://config-conformancepack-bucket/ConformancePack-Body.template

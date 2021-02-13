@@ -1,0 +1,197 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A sample stack containing some AWS managed rules to be deployed.
+
+# Stack Parameters
+Parameters:
+  RootAccessKeyRuleName:
+    Type: String
+    Default: iam-root-access-key-check
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  S3VersioningRuleName:
+    Type: String
+    Default: s3-bucket-versioning-enabled
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  SubnetAutoAssignPublicIPRuleName:
+    Type: String
+    Default: subnet-auto-assign-public-ip-disabled
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  S3KMSEncryptionRuleName:
+    Type: String
+    Default: s3-default-encryption-kms
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  EBSEncryptionRuleName:
+    Type: String
+    Default: ec2-ebs-encryption-by-default
+    Description: The name that you assign to the AWS Config rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+  isMfaDeleteEnabled:
+    Type: String
+    Default: ''
+    Description: MFA delete is enabled for your S3 buckets.
+  MaximumExecutionFrequency:
+    Type: String
+    Default: One_Hour
+    Description: The frequency that you want AWS Config to run evaluations for the
+      rule.
+    MinLength: '1'
+    ConstraintDescription: This parameter is required.
+    AllowedValues:
+    - One_Hour
+    - Three_Hours
+    - Six_Hours
+    - Twelve_Hours
+    - TwentyFour_Hours
+  kmsKeyArns:
+    Type: String
+    Default: ''
+    Description: Comma separated list of AWS KMS key ARNs allowed for encrypting Amazon
+      S3 Buckets.
+
+# Stack Resources (Config Rules)
+Resources:
+  RootAccessKeyRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName:
+        Ref: RootAccessKeyRuleName
+      Description: Checks whether the root user access key is available. The rule
+        is compliant if the user access key does not exist.
+      InputParameters: {}
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: IAM_ROOT_ACCESS_KEY_CHECK
+      MaximumExecutionFrequency:
+        Ref: MaximumExecutionFrequency
+  S3VersioningRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName:
+        Ref: S3VersioningRuleName
+      Description: Checks whether versioning is enabled for your S3 buckets.
+      InputParameters:
+        isMfaDeleteEnabled:
+          Fn::If:
+          - isMfaDeleteEnabled
+          - Ref: isMfaDeleteEnabled
+          - Ref: AWS::NoValue
+      Scope:
+        ComplianceResourceTypes:
+        - AWS::S3::Bucket
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_VERSIONING_ENABLED
+  SubnetAutoAssignPublicIPRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName:
+        Ref: SubnetAutoAssignPublicIPRuleName
+      Description: Checks if Amazon Virtual Private Cloud (Amazon VPC) subnets are
+        assigned a public IP address. This rule is NON_COMPLIANT if Amazon VPC has
+        subnets that are assigned a public IP address.
+      InputParameters: {}
+      Scope:
+        ComplianceResourceTypes:
+        - AWS::EC2::Subnet
+      Source:
+        Owner: AWS
+        SourceIdentifier: SUBNET_AUTO_ASSIGN_PUBLIC_IP_DISABLED
+  S3KMSEncryptionRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName:
+        Ref: S3KMSEncryptionRuleName
+      Description: Checks whether the Amazon S3 buckets are encrypted with AWS Key
+        Management Service(AWS KMS). The rule is NON_COMPLIANT if the Amazon S3 bucket
+        is not encrypted with AWS KMS key.
+      InputParameters:
+        kmsKeyArns:
+          Fn::If:
+          - kmsKeyArns
+          - Ref: kmsKeyArns
+          - Ref: AWS::NoValue
+      Scope:
+        ComplianceResourceTypes:
+        - AWS::S3::Bucket
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_DEFAULT_ENCRYPTION_KMS
+  EBSEncryptionConfigRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName:
+        Ref: EBSEncryptionRuleName
+      Description: Check that Amazon Elastic Block Store (EBS) encryption is enabled
+        by default. The rule is NON_COMPLIANT if the encryption is not enabled.
+      InputParameters: {}
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: EC2_EBS_ENCRYPTION_BY_DEFAULT
+      MaximumExecutionFrequency:
+        Ref: MaximumExecutionFrequency
+
+# Stack Metadata
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Required
+      Parameters: []
+    - Label:
+        default: Optional
+      Parameters:
+      - isMfaDeleteEnabled
+      - kmsKeyArns
+
+# Stack Conditions
+Conditions:
+  isMfaDeleteEnabled:
+    Fn::Not:
+    - Fn::Equals:
+      - ''
+      - Ref: isMfaDeleteEnabled
+  kmsKeyArns:
+    Fn::Not:
+    - Fn::Equals:
+      - ''
+      - Ref: kmsKeyArns
+
+# Stack Outputs
+Outputs:
+  RootAccessKeyRule:
+    Description: Checks whether the root user access key is available. The rule
+        is compliant if the user access key does not exist.
+    Value:
+      Ref: RootAccessKeyRuleName
+  S3VersioningRule:
+    Description: Checks whether versioning is enabled for your S3 buckets.
+    Value:
+      Ref: S3VersioningRuleName
+  SubnetAutoAssignPublicIPRule:
+    Description: Checks if Amazon Virtual Private Cloud (Amazon VPC) subnets are
+        assigned a public IP address. This rule is NON_COMPLIANT if Amazon VPC has
+        subnets that are assigned a public IP address.
+    Value:
+      Ref: SubnetAutoAssignPublicIPRuleName
+  S3KMSEncryptionRule:
+    Description: Checks whether the Amazon S3 buckets are encrypted with AWS Key
+        Management Service(AWS KMS). The rule is NON_COMPLIANT if the Amazon S3 bucket
+        is not encrypted with AWS KMS key.
+    Value:
+      Ref: S3KMSEncryptionRuleName
+  EBSEncryptionConfigRule:
+    Description: Check that Amazon Elastic Block Store (EBS) encryption is enabled
+        by default. The rule is NON_COMPLIANT if the encryption is not enabled.
+    Value:
+      Ref: EBSEncryptionRuleName
