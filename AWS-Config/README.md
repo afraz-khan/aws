@@ -23,6 +23,6 @@
      	4. S3_DEFAULT_ENCRYPTION_KMS
      	5. EC2_EBS_ENCRYPTION_BY_DEFAULT
   
-  		**Note**: Above mentioned s3 endpoint is used to get CloudFormation template of individual managed rules to save time.
+  		**Note**: Above mentioned s3 endpoint is used to get CloudFormation template of individual managed rules to save time. If you want your own set of rules in template then merge them all avoinding any resource name/label/id conflict in template.
         
   - **Deploy-Multiple-Managed-Rules.template** can also be used as **TemplateBody** for a Config Conformance Pack. Sample Conformance Pack is given in **SampleConformancePack.yaml** file present in directory.
