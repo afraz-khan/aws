@@ -1,7 +1,7 @@
 ## AWS Config
 
 #### AWS Config Rules Deployment
-  There are multiple ways to deploy config rules available [here](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html) based on use-case. Deploying individual rules one by one is quite a time consuming especially when you have hundreds of accounts in your AWS environment. Following methods mostly are used i.e. 
+  There are multiple ways to deploy config rules available [here](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html) based on different use-cases. Deploying individual rules one by one is quite a time consuming task especially when you have hundreds of accounts in your AWS environment. Following methods are mostly used:
   
   1. To deploy rules across all accounts in an organization, AWS **Firewall Manager** can be used.
   1. To deploy multiple rules at a single time in one account, AWS Config **Comformance Packs** can be used for better hierarchy/grouping.
