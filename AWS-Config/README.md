@@ -1,6 +1,6 @@
-## AWS Config
+# AWS Config
 
-#### AWS Config Rules Deployment
+### AWS Config Rules Deployment
   There are multiple ways to deploy config rules available [here](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html) based on different use-cases. Deploying individual rules one by one is quite a time consuming task especially when you have hundreds of accounts in your AWS environment. Following methods are mostly used:
   
   1. To deploy rules across all accounts in an organization, AWS **Firewall Manager** can be used.
@@ -9,7 +9,7 @@
   
    **NOTE:** Rules can be managed or custom. But for custom rules, there may be some extra properties to be configured.
    
- #### Deploy Managed Config Rules
+ ### Deploy Managed Config Rules
    - Individual Rules can be easily deployed in form of CloudFormation stacks using the following official s3 template URL for managed rules.
      
    		>s3.amazonaws.com/aws-configservice-us-east-1/cloudformation-templates-for-managed-rules/**[ THE_RULE_IDENTIFIER ]**.template
