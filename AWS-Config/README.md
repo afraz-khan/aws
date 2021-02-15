@@ -26,3 +26,6 @@
   		**Note**: Above mentioned s3 endpoint is used to get CloudFormation template of individual managed rules to save time.
         
   - **Deploy-Multiple-Managed-Rules.template** can also be used as **TemplateBody** for a Config Conformance Pack. Sample Conformance Pack is given in **SampleConformancePack.yaml** file present in directory.
+
+ #### Develop & Deploy Custom Rules
+  > _Please navigate to **Custom-Rules** directory above.
