@@ -28,4 +28,4 @@
   - **Deploy-Multiple-Managed-Rules.template** can also be used as **TemplateBody** for a Config Conformance Pack. Sample Conformance Pack is given in **SampleConformancePack.yaml** file present in directory.
 
  ### Develop & Deploy Custom Rules
-  > _Please navigate to **Custom-Rules** directory above._
+  > _Please navigate to [**Custom-Rules**](https://github.com/MrAfrazKhan/aws/tree/main/AWS-Config/Custom-Rules) directory above._
