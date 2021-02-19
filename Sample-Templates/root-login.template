@@ -1,0 +1,158 @@
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# Detect Root User Login via CloudTrail
+# CloudTrail sends events to cloudwatch event rule that checks for 
+# ROOT LOGIN via event rule pattern and if match then triggers a lambda function,
+# That lambda function publishes a custom email message(body+subject) to an SNS 
+# topic to which concerned person's email is subscribed.
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ROOT-AWS-Console-Sign-In-via-CloudTrail
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Amazon SNS parameters
+      Parameters:
+      - Email Address
+Parameters:
+  EmailAddress:
+    Type: String
+    AllowedPattern: "^[\\x20-\\x45]?[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$"
+    ConstraintDescription: Email address required.
+    Description: Enter an email address you want to subscribe to the Amazon SNS topic
+      that will send notifications if your account's AWS root user logs in.
+Resources:
+  RootLoginLambda:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: 
+        ZipFile: | 
+          import boto3
+          import json
+          import os
+          sns_arn = os.environ("SNS_TOPIC_ARN")
+
+          def lambda_handler(event, context):
+          client = boto3.client("sns")
+          resp = client.publish(TargetArn=sns_arn, Message=json.dumps("Your account access"), Subject="ROOT AWS Account | Signin Notification")
+      Description: "Root Login Lambda"
+      Environment: 
+        Variables:
+          SNS_TOPIC_ARN: !Ref RootActivitySNSTopic
+      FunctionName: RootLoginLambda
+      Handler: index.lambda_handler
+      Role:
+        'Fn::GetAtt':
+          - RootLoginIAMRole
+          - Arn
+      Runtime: python3.8
+      Timeout: 300
+    DependsOn: 
+    - RootLoginIAMRole
+    - RootActivitySNSTopic
+  RootLoginIAMRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: root iam role.
+      Policies: 
+        - PolicyName: RootLoginPolicy
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+            - Sid: Stmt1613663909679
+              Action:
+              - logs:CreateLogGroup
+              Effect: Allow
+              Resource: arn:aws:logs:us-east-1:992959714272:*
+            - Sid: Stmt1613663945135
+              Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Effect: Allow
+              Resource: "*"
+            - Sid: Stmt1613664004513
+              Action:
+              - sns:Publish
+              Effect: Allow
+              Resource: "*"
+      RoleName: RootLoginIAMRole
+  
+
+
+  RootActivitySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ROOT-AWS-Console-Sign-In-via-CloudTrail
+      Subscription:
+      - Endpoint:
+          Ref: EmailAddress
+        Protocol: email
+      TopicName: ROOT-AWS-Console-Sign-In-via-CloudTrail
+  EventsRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Events rule for monitoring root AWS Console Sign In activity
+      EventPattern:
+        detail-type:
+        - AWS Console Sign In via CloudTrail
+        detail:
+          userIdentity:
+            type:
+            - Root
+      Name:
+        Fn::Sub: "${AWS::StackName}-RootActivityRule"
+      State: ENABLED
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+            - RootLoginLambda
+            - Arn
+        Id: RootLoginLambda
+    DependsOn:
+    - RootLoginLambda
+  RootPolicyDocument:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: RootPolicyDocument
+        Version: '2012-10-17'
+        Statement:
+        - Sid: RootPolicyDocument
+          Effect: Allow
+          Principal:
+            Service: events.amazonaws.com
+          Action: sns:Publish
+          Resource:
+          - Ref: RootActivitySNSTopic
+      Topics:
+      - Ref: RootActivitySNSTopic
+Outputs:
+  EventsRule:
+    Value:
+      Ref: EventsRule
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-RootAPIMonitorEventsRule"
+    Description: Event Rule ID.
