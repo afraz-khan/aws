@@ -2,12 +2,12 @@
 
 CloudTrail has 2 types of API calls which have to be captured for detecting root activity in an AWS account. One is console login and other one is all post login actions. Given template captures both of these event types and notifies user about root activity in a single AWS region.
 
-All global/region-less API calls including **AWS Console Login** land in `us-east-1` region by default, so above template should be deployed in `us-east-1` for sure. Also deploy the template in all other regions to detect root user API calls across whole account and also to achieve 100% security of your account.
+All global/region-less API calls including **AWS Console Login** land in `us-east-1` region by default, so above template should be deployed in `us-east-1` for sure. Also deploy the template in all other regions to detect root user API calls across whole account and also to achieve 100% security for your account.
 
 ----
 
 #### Prerequisites
-- Create a multi region _**Trail**_ in CloudTrail, for which Cloudwatch logs are enabled and read/write operations also enabled for _**management events**_ because mangement events are filtered to detect root activity.
+- Create a multi region _**Trail**_ in CloudTrail, for which Cloudwatch logs are enabled and read/write operations are also enabled for _**management events**_ because mangement events are filtered to detect root activity.
 
 #### Resources
 Template solution has following major resources;
