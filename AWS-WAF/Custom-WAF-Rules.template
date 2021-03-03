@@ -1,0 +1,227 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Sample AWS WAF Custom Rules.
+
+Resources:
+  SampleRegexPatternSet:
+    Type: AWS::WAFv2::RegexPatternSet
+    Properties:
+      Name: SampleRegexPatternSet
+      Scope: REGIONAL
+      Description: This is an sample RegexPatternSet
+      RegularExpressionList:
+        - ([A-Z])\w+
+  SampleIPSet:
+    Type: 'AWS::WAFv2::IPSet'
+    Properties:
+      Description: SampleIPSet
+      Name: SampleIPSet
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses:
+        - 103.255.4.83/32
+  SampleCustomRulesWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties: 
+      DefaultAction: 
+        Allow : {}
+      Description: Sample Custom Rules Web ACLs.
+      Name: Sample-Custom-Rules
+      Scope: REGIONAL
+      VisibilityConfig: 
+        CloudWatchMetricsEnabled: true
+        MetricName: Sample-Custom-Rules
+        SampledRequestsEnabled: true
+      Rules: 
+        - Name: matchSQLi
+          Action: 
+            Block : {}
+          Priority: 0
+          Statement: 
+            OrStatement:
+              Statements:
+              - SqliMatchStatement:
+                  FieldToMatch:
+                    QueryString: {}
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 0
+              - SqliMatchStatement:
+                  FieldToMatch:
+                    Body: {}
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 1
+              - SqliMatchStatement:
+                  FieldToMatch:
+                    SingleHeader:
+                      Name: cookie
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 2
+          VisibilityConfig: 
+            CloudWatchMetricsEnabled: true
+            MetricName: matchSQLi
+            SampledRequestsEnabled: true
+        - Name: matchXSS
+          Priority: 1
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: matchXSS
+          Statement:
+            OrStatement:
+              Statements:
+              - XssMatchStatement:
+                  FieldToMatch:
+                    AllQueryArguments: {}
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 0
+              - XssMatchStatement:
+                  FieldToMatch:
+                    Body: {}
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 1
+              - XssMatchStatement:
+                  FieldToMatch:
+                    SingleHeader:
+                      Name: cookie
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 2
+        - Name: matchHeaderANDQueryParam
+          Priority: 2
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: matchHeaderANDQueryParam
+          Statement:
+            OrStatement:
+              Statements:
+              - AndStatement:
+                  Statements:
+                  - ByteMatchStatement:
+                      FieldToMatch:
+                        SingleHeader:
+                          Name: x-milkshake
+                      PositionalConstraint: EXACTLY
+                      SearchString: chocolate
+                      TextTransformations:
+                      - Type: NONE
+                        Priority: 0
+                  - ByteMatchStatement:
+                      FieldToMatch:
+                        SingleHeader:
+                          Name: x-favourite-topping
+                      PositionalConstraint: EXACTLY
+                      SearchString: nuts
+                      TextTransformations:
+                      - Type: NONE
+                        Priority: 0
+              - AndStatement:
+                  Statements:
+                  - ByteMatchStatement:
+                      FieldToMatch:
+                        SingleQueryArgument:
+                          Name: milkshake
+                      PositionalConstraint: EXACTLY
+                      SearchString: banana
+                      TextTransformations:
+                      - Type: NONE
+                        Priority: 0
+                  - ByteMatchStatement:
+                      FieldToMatch:
+                        SingleQueryArgument:
+                          Name: favourite-topping
+                      PositionalConstraint: EXACTLY
+                      SearchString: sauce
+                      TextTransformations:
+                      - Type: NONE
+                        Priority: 0
+                  - ByteMatchStatement:
+                      FieldToMatch:
+                        UriPath: {}
+                      PositionalConstraint: STARTS_WITH
+                      SearchString: "/test/admin"
+                      TextTransformations:
+                      - Type: NONE
+                        Priority: 0
+        - Name: matchLocationANDSize
+          Priority: 3
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: matchLocationANDSize
+          Statement:
+            OrStatement:
+              Statements:
+              - SizeConstraintStatement:
+                  FieldToMatch:
+                    Body: {}
+                  ComparisonOperator: GT
+                  Size: '100'
+                  TextTransformations:
+                  - Type: NONE
+                    Priority: 0
+              - NotStatement:
+                  Statement:
+                    GeoMatchStatement:
+                      CountryCodes:
+                      - US
+                      - PK
+        - Name: matchIPANDRegex
+          Priority: 4
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: matchIPANDRegex
+          Statement:
+            OrStatement:
+              Statements:
+                - IPSetReferenceStatement:
+                    Arn: !GetAtt SampleIPSet.Arn
+                    IPSetForwardedIPConfig: 
+                      FallbackBehavior: NO_MATCH
+                      HeaderName: X-Forwarded-For
+                      Position: ANY
+                - RegexPatternSetReferenceStatement:
+                      Arn: !GetAtt SampleRegexPatternSet.Arn
+                      FieldToMatch: 
+                        AllQueryArguments: {}
+                      TextTransformations: 
+                      - Priority: 0
+                        Type: NONE
+        - Name: matchRequestRate
+          Priority: 5
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: matchRequestRate
+          Statement:
+            RateBasedStatement:
+              Limit: 100 # cann't be less than 100
+              AggregateKeyType: IP
+              ScopeDownStatement:
+                ByteMatchStatement:
+                  SearchString: get
+                  FieldToMatch:
+                    Method: {}
+                  TextTransformations:
+                  - Priority: 0
+                    Type: LOWERCASE
+                  PositionalConstraint: EXACTLY
+    DependsOn: 
+      - SampleRegexPatternSet
+      - SampleIPSet
