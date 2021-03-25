@@ -1,0 +1,1 @@
+Please open **readme.txt** for guide on script execution.
