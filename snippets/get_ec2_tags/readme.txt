@@ -5,7 +5,7 @@ and saves to a json file.
 
 -) Requirements
     - Create an IAM User with EC2 Read Only permissions and having programmatic access.
-    - Setup AWS CLI using Access Keys for that new user and if it works.
+    - Setup AWS CLI using Access Keys for the new user and test if it works. (run some aws cli commands)
     - Download python3 for your particular OS.
     - Install Python SDK for AWS named boto3 through pip.
 
