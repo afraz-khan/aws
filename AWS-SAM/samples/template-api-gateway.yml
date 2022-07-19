@@ -1,0 +1,24 @@
+# SAM File
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: > 
+  Hello World SAM Template with a lambda function and an 
+  API-Gateway API.
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: app_api_gateway.lambda_handler
+      Runtime: python3.9
+      Description: A starter AWS Lambda function
+      MemorySize: 128
+      Timeout: 3
+      Events:
+        HelloWorldSAMAPI:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: GET
