@@ -11,7 +11,7 @@ Use the **AWS::CloudFormation::CustomResource** or **Custom::**_**MyCustomResour
 More --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html
 
 ### Example
-Find a CloudFormation template [here](https://github.com/afraz-khan/aws/blob/main/Sample-Templates/cross-site-cloudformation.yml). 
+Find a CloudFormation template [here](https://github.com/afraz-khan/aws/blob/main/Sample-Templates/Custom-Resources/cross-site-cloudformation.yml). 
 - This template will read some terraform outputs from a terraform state file. File is hosted on an S3 bucket. This work is done using a Lambda based Custm Resource which runs the code to read the outputs. 
 - CloudFormation template exports those terraform outputs tobe used in cloudformation based infra.
 ---
