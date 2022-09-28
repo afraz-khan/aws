@@ -1,5 +1,3 @@
-# This CloudFormation template is produced by NorthBay on "AS-IS" software bases.
-
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWS root user activity monitoring via CloudTrail.
 Metadata:
