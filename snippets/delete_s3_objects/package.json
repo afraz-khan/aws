@@ -1,0 +1,18 @@
+{
+  "name": "delete_s3_objects",
+  "version": "1.0.0",
+  "description": "delete s3 objects by prefix",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "s3",
+    "aws"
+  ],
+  "author": "Afraz Khan",
+  "license": "ISC",
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.236.0"
+  }
+}
