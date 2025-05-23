@@ -1,0 +1,5 @@
+/snippets/delete_s3_objects/node_modules/*
+
+.venv
+
+.ipynb_checkpoints

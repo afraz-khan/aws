@@ -115,4 +115,16 @@ const PREFIX = '.git';
 const WITH_VERSIONS = true
 const WITH_DELETE_MARKERS = true
 
+/**
+ * You first need to list all the objects using list command.
+ * Thenm use delete command to delete the listed objects.
+ * 
+ * Use below args with "node index.js" command.
+ * 
+ * Command Arguments
+ * -----------------
+ * list-objects
+ * delete-objects
+ */
+
 main();
